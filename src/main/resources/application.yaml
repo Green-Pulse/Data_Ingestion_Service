@@ -1,3 +1,6 @@
+server:
+    port: 8080
+
 spring:
   kafka:
     producer:
@@ -7,3 +10,14 @@ spring:
   application:
     name: data-ingestion-service
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, metrics, prometheus
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
