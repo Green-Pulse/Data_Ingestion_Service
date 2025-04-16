@@ -28,19 +28,24 @@ public class OpenWeatherService {
 
     public WeatherDataEvent fetchWeatherData() {
         try {
+
             String json = restTemplate.getForObject(URL, String.class);
             JsonNode root = objectMapper.readTree(json);
 
             JsonNode hourly = root.path("hourly");
-            JsonNode temperature = hourly.path("temperature_2m").get(0);
-            JsonNode humidity = hourly.path("relative_humidity_2m").get(0);
-            JsonNode windSpeed = hourly.path("windspeed_10m").get(0);
-            String time = hourly.path("time").get(0).asText();
+
+            JsonNode timeArray = hourly.path("time");
+            int index = findCurrentTimeIndex(timeArray);
+
+            double temperature = hourly.path("temperature_2m").get(index).asDouble();
+            double humidity = hourly.path("relative_humidity_2m").get(index).asDouble();
+            double windSpeed = hourly.path("windspeed_10m").get(index).asDouble();
+            String time = timeArray.get(index).asText();
 
             return new WeatherDataEvent(
                     "Baku",
-                    temperature.asDouble(),
-                    humidity.asDouble(),
+                    temperature,
+                    humidity,
                     LocalDateTime.parse(time)
             );
 
@@ -56,18 +61,34 @@ public class OpenWeatherService {
             JsonNode root = objectMapper.readTree(json);
 
             JsonNode hourly = root.path("hourly");
-            double temp = hourly.path("temperature_2m").get(0).asDouble();
-            double pres = hourly.path("pressure_msl").get(0).asDouble();
-            double dewp = hourly.path("dewpoint_2m").get(0).asDouble();
-            double rain = hourly.path("rain").get(0).asDouble();
-            double windSpeed = hourly.path("windspeed_10m").get(0).asDouble();
-            int windDir = hourly.path("wind_direction_10m").get(0).asInt();
+
+            JsonNode timeArray = hourly.path("time");
+            int index = findCurrentTimeIndex(timeArray);
+
+            double temp = hourly.path("temperature_2m").get(index).asDouble();
+            double pres = hourly.path("pressure_msl").get(index).asDouble();
+            double dewp = hourly.path("dewpoint_2m").get(index).asDouble();
+            double rain = hourly.path("rain").get(index).asDouble();
+            double windSpeed = hourly.path("windspeed_10m").get(index).asDouble();
+            int windDir = hourly.path("wind_direction_10m").get(index).asInt();
+            String time = timeArray.get(index).asText();
 
             boolean wdNE = isDirectionBetween(windDir, 22, 67);
             boolean wdSE = isDirectionBetween(windDir, 112, 157);
             boolean wdNW = isDirectionBetween(windDir, 292, 337);
 
-            return new SensorDataEvent("Baku", temp, pres, dewp, rain, windSpeed, wdNE, wdNW, wdSE);
+            return new SensorDataEvent(
+                    "Baku",
+                    temp,
+                    pres,
+                    dewp,
+                    rain,
+                    windSpeed,
+                    wdNE,
+                    wdNW,
+                    wdSE,
+                    LocalDateTime.parse(time)
+            );
 
         } catch (Exception e) {
             System.err.println("Error while getting sensor data: " + e.getMessage());
@@ -78,4 +99,16 @@ public class OpenWeatherService {
     private boolean isDirectionBetween(int degrees, int min, int max) {
         return degrees >= min && degrees <= max;
     }
+
+    private int findCurrentTimeIndex(JsonNode timeArray) {
+        String currentTime = LocalDateTime.now().withSecond(0).withNano(0).toString();
+        for (int i = 0; i < timeArray.size(); i++) {
+            String t = timeArray.get(i).asText();
+            if (t.equals(currentTime)) {
+                return i;
+            }
+        }
+        return 0; // fallback на 00:00 если текущего нет
+    }
+
 }

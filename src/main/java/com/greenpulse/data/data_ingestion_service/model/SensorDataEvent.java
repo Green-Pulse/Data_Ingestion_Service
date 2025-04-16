@@ -4,12 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+//@RedisHash("sensor-data")
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SensorDataEvent {
+public class SensorDataEvent implements Serializable {
+//    @Id
     private String city;
     private double temp;
     private double pres;
@@ -19,5 +26,6 @@ public class SensorDataEvent {
     private boolean wd_NE;
     private boolean wd_NW;
     private boolean wd_SE;
+    private LocalDateTime timestamp;
 }
 
