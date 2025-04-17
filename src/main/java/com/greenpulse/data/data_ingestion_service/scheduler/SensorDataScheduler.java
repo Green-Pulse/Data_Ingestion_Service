@@ -39,7 +39,7 @@ public class SensorDataScheduler {
             event.setTimestamp(LocalDateTime.now());
 
             // 1. Сформировать уникальный ключ
-            String key = "weather-data:" + event.getCity() + ":" + event.getTimestamp().format(formatter);
+            String key = "sensor-data:" + event.getCity() + ":" + event.getTimestamp().format(formatter);
 
             try {
                 // 2. Сериализовать объект в JSON
