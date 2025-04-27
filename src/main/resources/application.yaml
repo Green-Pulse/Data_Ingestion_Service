@@ -1,17 +1,17 @@
 server:
-    port: 8080
+    port: 8090
 
 spring:
   kafka:
+    bootstrap-servers: kafka-1:9092,kafka-2:9095,kafka-3:9098
     producer:
-      bootstrap-servers: "[::1]:9092, [::1]:9094, [::1]:9096"
       key.serializer: org.apache.kafka.common.serialization.StringSerializer
       value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
   application:
     name: data-ingestion-service
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
 
 management:
